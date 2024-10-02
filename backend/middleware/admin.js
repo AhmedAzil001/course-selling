@@ -2,15 +2,22 @@ const jwt = require("jsonwebtoken");
 const { ADMIN_SECRET_KEY } = require("../config");
 
 const adminAuth = (req, res, next) => {
-  const token = req.headers.token;
-  const { id } = jwt.verify(token, ADMIN_SECRET_KEY);
+  try {
+    const token = req.headers.token;
+    const { adminId } = jwt.verify(token, ADMIN_SECRET_KEY);
 
-  if (id) {
-    req.userId = id;
-    next();
-  } else {
-    res.status(404).json({
-      message: "You are not logged in",
+    if (adminId) {
+      req.adminId = adminId;
+      next();
+    } else {
+      res.send(401).json({
+        message: "Token is expired",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong",
+      error: error.message,
     });
   }
 };

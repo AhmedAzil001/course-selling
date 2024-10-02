@@ -1,13 +1,22 @@
 const { Router, json } = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 const userRouter = Router();
 const { USER_SECRET_KEY } = require("../config");
 const { UserModel, PurchaseModel, CourseModel } = require("../db");
 const { userAuth } = require("../middleware/user");
+const { signinBody, signupBody } = require("../validations");
 
 userRouter.post("/signup", async (req, res) => {
+  const { success, error } = signupBody.safeParse(req.body);
+
+  if (!success) {
+    return res.status(404).json({
+      message: "Incorrect format",
+      error: error,
+    });
+  }
+
   const { email, password, firstName, lastName } = req.body;
 
   try {
@@ -44,6 +53,14 @@ userRouter.post("/signup", async (req, res) => {
 });
 
 userRouter.post("/signin", async (req, res) => {
+  const { success, error } = signinBody.safeParse(req.body);
+
+  if (!success) {
+    return res.status(404).json({
+      message: "Incorrect format",
+      error: error,
+    });
+  }
   const { email, password } = req.body;
 
   try {
